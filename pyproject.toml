@@ -42,6 +42,11 @@ dev = [
     "build",
     "ruff",
 ]
+test = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "pytest-django",
+]
 
 # XBlock entry points will be added here as xblocks are migrated
 # Example:
@@ -85,3 +90,12 @@ known-third-party = ["django", "xblock"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+# Pytest configuration
+# https://docs.pytest.org/en/stable/reference/customize.html
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
