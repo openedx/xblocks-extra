@@ -47,6 +47,10 @@ test = [
     "pytest-cov",
     "pytest-django",
 ]
+docs = [
+    "sphinx",
+    "sphinx-book-theme",
+]
 
 # XBlock entry points will be added here as xblocks are migrated
 # Example:
