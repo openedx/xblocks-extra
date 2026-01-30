@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xblocks-extra"
+version = "0.1.0"
+description = "A collection of XBlocks for the Open edX platform that preserve their original package paths for drop-in replacement"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "AGPL-3.0"
+authors = [
+    {name = "Open edX Project", email = "oscm@openedx.org"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = [
+    "Python",
+    "edx",
+    "xblock",
+]
+dependencies = [
+    "XBlock",
+    "Django>=4.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/openedx/xblocks-extra"
+Repository = "https://github.com/openedx/xblocks-extra"
+Documentation = "https://xblocks-extra.readthedocs.io"
+
+[project.optional-dependencies]
+dev = [
+    "build",
+]
+
+# XBlock entry points will be added here as xblocks are migrated
+# Example:
+# [project.entry-points."xblock.v1"]
+# foo = "foo_xblock:FooXBlock"
+
+# Packages live in src/ but are installed without the src prefix
+# e.g., src/foo_xblock/ is installed as foo_xblock
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
