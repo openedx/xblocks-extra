@@ -40,6 +40,7 @@ Documentation = "https://xblocks-extra.readthedocs.io"
 [project.optional-dependencies]
 dev = [
     "build",
+    "ruff",
 ]
 
 # XBlock entry points will be added here as xblocks are migrated
@@ -55,3 +56,32 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["tests*"]
+
+# Ruff configuration
+# https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "DJ",     # flake8-django
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = []
+known-third-party = ["django", "xblock"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
