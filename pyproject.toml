@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "xblocks-extra"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A collection of XBlocks for the Open edX platform that preserve their original package paths for drop-in replacement"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -127,3 +127,16 @@ show_missing = true
 
 [tool.coverage.html]
 directory = "htmlcov"
+
+# Setuptools SCM configuration
+# https://setuptools-scm.readthedocs.io/
+[tool.setuptools_scm]
+version_scheme = "only-version"
+local_scheme = "no-local-version"
+
+# Semantic Release configuration
+# https://python-semantic-release.readthedocs.io/
+[tool.semantic_release]
+# Use SETUPTOOLS_SCM_PRETEND_VERSION to set version at build time since the
+# build step happens before the repo gets tagged.
+build_command = "pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=$NEW_VERSION python -m build"
