@@ -1,0 +1,21 @@
+# Read the Docs configuration file
+# https://docs.readthedocs.io/en/stable/config-file/v2.html
+
+version: 2
+
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: true
+
+build:
+  os: "ubuntu-lts-latest"
+  tools:
+    python: "3.12"
+
+python:
+  install:
+    # Install docs dependencies
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
