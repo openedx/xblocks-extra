@@ -1,17 +1,18 @@
 """
 Tests for xblock-submit-and-compare
 """
+
 import re
 import unittest
+from unittest import mock
 from xml.sax.saxutils import escape
 
-from unittest import mock
 from django.test.client import Client
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
 
-from ..xblocks import SubmitAndCompareXBlock
 from ..views import get_body
+from ..xblocks import SubmitAndCompareXBlock
 
 
 class SubmitAndCompareXblockTestCase(unittest.TestCase):
@@ -19,12 +20,13 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
     """
     A complete suite of unit tests for the Submit-and-compare XBlock
     """
+
     @classmethod
     def make_an_xblock(cls, **kw):
         """
         Helper method that creates a Free-text Response XBlock
         """
-        course_id = SlashSeparatedCourseKey('foo', 'bar', 'baz')
+        course_id = SlashSeparatedCourseKey("foo", "bar", "baz")
         runtime = mock.Mock(course_id=course_id)
         scope_ids = mock.Mock()
         field_data = DictFieldData(kw)
@@ -54,16 +56,13 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         Checks studio view for instance variables specified by the instructor.
         """
         with mock.patch(
-            "submit_and_compare.mixins.fragment.XBlockFragmentBuilderMixin.get_i18n_service",
-            return_value=None
+            "submit_and_compare.mixins.fragment.XBlockFragmentBuilderMixin.get_i18n_service", return_value=None
         ):
             studio_view_html = self.studio_view_html()
         self.assertIn(self.xblock.display_name, studio_view_html)
-        xblock_body = get_body(
-            self.xblock.question_string
-        )
-        studio_view_html = re.sub(r'\W+', ' ', studio_view_html.strip())
-        xblock_body = re.sub(r'\W+', ' ', xblock_body.strip())
+        xblock_body = get_body(self.xblock.question_string)
+        studio_view_html = re.sub(r"\W+", " ", studio_view_html.strip())
+        xblock_body = re.sub(r"\W+", " ", xblock_body.strip())
         self.assertIn(
             escape(xblock_body),
             studio_view_html,
@@ -74,14 +73,14 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         """
         Checks that all instance variables are initialized correctly
         """
-        self.assertEqual('Submit and Compare', self.xblock.display_name)
+        self.assertEqual("Submit and Compare", self.xblock.display_name)
         self.assertIn(
-            'Before you begin the simulation',
+            "Before you begin the simulation",
             self.xblock.question_string,
         )
         self.assertEqual(0.0, self.xblock.score)
         self.assertEqual(0, self.xblock.max_attempts)
-        self.assertEqual('', self.xblock.student_answer)
+        self.assertEqual("", self.xblock.student_answer)
         self.assertEqual(0, self.xblock.count_attempts)
 
     def student_view_html(self):
@@ -104,7 +103,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         """
         self.xblock.score = 1
         self.xblock.weight = 0
-        self.assertEqual('', self.xblock._get_problem_progress())
+        self.assertEqual("", self.xblock._get_problem_progress())
 
     def test_problem_progress_score_zero_weight_singular(self):
         # pylint: disable=invalid-name, protected-access
@@ -115,7 +114,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         self.xblock.score = 0
         self.xblock.weight = 1
         self.assertEqual(
-            '(1 point possible)',
+            "(1 point possible)",
             self.xblock._get_problem_progress(),
         )
 
@@ -128,7 +127,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         self.xblock.score = 0
         self.xblock.weight = 3
         self.assertEqual(
-            '(3 points possible)',
+            "(3 points possible)",
             self.xblock._get_problem_progress(),
         )
 
@@ -141,7 +140,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         self.xblock.score = 1
         self.xblock.weight = 1
         self.assertEqual(
-            '(1/1 point)',
+            "(1/1 point)",
             self.xblock._get_problem_progress(),
         )
 
@@ -154,7 +153,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         self.xblock.score = 1
         self.xblock.weight = 3
         self.assertEqual(
-            '(3/3 points)',
+            "(3/3 points)",
             self.xblock._get_problem_progress(),
         )
 
@@ -165,7 +164,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         appropriate
         """
         self.xblock.max_attempts = 0
-        self.assertEqual('', self.xblock._get_used_attempts_feedback())
+        self.assertEqual("", self.xblock._get_used_attempts_feedback())
 
     def test_used_attempts_feedback_normal(self):
         # pylint: disable=invalid-name, protected-access
@@ -175,7 +174,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         self.xblock.max_attempts = 5
         self.xblock.count_attempts = 3
         self.assertEqual(
-            'You have used 3 of 5 submissions',
+            "You have used 3 of 5 submissions",
             self.xblock._get_used_attempts_feedback(),
         )
 
@@ -185,7 +184,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         Tests that get_submit_class returns a blank value when appropriate
         """
         self.xblock.max_attempts = 0
-        self.assertEqual('', self.xblock._get_submit_class())
+        self.assertEqual("", self.xblock._get_submit_class())
 
     def test_submit_class_nodisplay(self):
         # pylint: disable=protected-access
@@ -196,7 +195,7 @@ class SubmitAndCompareXblockTestCase(unittest.TestCase):
         """
         self.xblock.max_attempts = 5
         self.xblock.count_attempts = 6
-        self.assertEqual('nodisplay', self.xblock._get_submit_class())
+        self.assertEqual("nodisplay", self.xblock._get_submit_class())
 
     def test_max_score(self):
         """

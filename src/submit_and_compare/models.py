@@ -1,13 +1,10 @@
 """
 Handle data access logic for the XBlock
 """
+
 import textwrap
 
-from xblock.fields import Float
-from xblock.fields import Integer
-from xblock.fields import List
-from xblock.fields import Scope
-from xblock.fields import String
+from xblock.fields import Float, Integer, List, Scope, String
 
 
 class SubmitAndCompareModelMixin:
@@ -17,18 +14,15 @@ class SubmitAndCompareModelMixin:
 
     has_score = True
     display_name = String(
-        display_name='Display Name',
-        default='Submit and Compare',
+        display_name="Display Name",
+        default="Submit and Compare",
         scope=Scope.settings,
-        help=(
-            'This name appears in the horizontal'
-            ' navigation at the top of the page'
-        ),
+        help=("This name appears in the horizontal navigation at the top of the page"),
     )
     student_answer = String(
-        default='',
+        default="",
         scope=Scope.user_state,
-        help='This is the student\'s answer to the question',
+        help="This is the student's answer to the question",
     )
     max_attempts = Integer(
         default=0,
@@ -39,27 +33,27 @@ class SubmitAndCompareModelMixin:
         scope=Scope.user_state,
     )
     your_answer_label = String(
-        default='Your Answer:',
+        default="Your Answer:",
         scope=Scope.settings,
-        help='Label for the text area containing the student\'s answer',
+        help="Label for the text area containing the student's answer",
     )
     our_answer_label = String(
-        default='Our Answer:',
+        default="Our Answer:",
         scope=Scope.settings,
-        help='Label for the \'expert\' answer',
+        help="Label for the 'expert' answer",
     )
     submit_button_label = String(
-        default='Submit and Compare',
+        default="Submit and Compare",
         scope=Scope.settings,
-        help='Label for the submit button',
+        help="Label for the submit button",
     )
     hints = List(
         default=[],
         scope=Scope.content,
-        help='Hints for the question',
+        help="Hints for the question",
     )
     question_string = String(
-        help='Default question content ',
+        help="Default question content ",
         scope=Scope.content,
         multiline_editor=True,
         default=textwrap.dedent("""
@@ -94,15 +88,15 @@ class SubmitAndCompareModelMixin:
                     </hint>
                 </demandhint>
             </submit_and_compare>
-        """))
+        """),
+    )
     score = Float(
         default=0.0,
         scope=Scope.user_state,
     )
     weight = Integer(
-        display_name='Weight',
-        help='This assigns an integer value representing '
-             'the weight of this problem',
+        display_name="Weight",
+        help="This assigns an integer value representing the weight of this problem",
         default=0,
         scope=Scope.settings,
     )

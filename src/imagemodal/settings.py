@@ -3,16 +3,14 @@ Stub settings for xblock
 """
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
         # 'NAME': 'intentionally-omitted',
     },
 }
-INSTALLED_APPS = (
-    'imagemodal',
-)
+INSTALLED_APPS = ("imagemodal",)
 LOCALE_PATHS = [
-    'imagemodal/translations',
+    "imagemodal/translations",
 ]
-SECRET_KEY = 'SECRET_KEY'
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+SECRET_KEY = "SECRET_KEY"
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

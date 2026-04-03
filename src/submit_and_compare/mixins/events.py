@@ -1,6 +1,7 @@
 """
 Provide event-related mixin functionality
 """
+
 from xblock.core import XBlock
 
 
@@ -15,17 +16,17 @@ class EventableMixin:
         Publish events
         """
         try:
-            event_type = data.pop('event_type')
+            event_type = data.pop("event_type")
         except KeyError:
             return {
-                'result': 'error',
-                'message': 'Missing event_type in JSON data',
+                "result": "error",
+                "message": "Missing event_type in JSON data",
             }
-        data['user_id'] = self.scope_ids.user_id
-        data['component_id'] = self._get_unique_id()
+        data["user_id"] = self.scope_ids.user_id
+        data["component_id"] = self._get_unique_id()
         self.runtime.publish(self, event_type, data)
         result = {
-            'result': 'success',
+            "result": "success",
         }
         return result
 
@@ -37,7 +38,7 @@ class EventableMixin:
             unique_id = self.location.name
         except AttributeError:
             # workaround for xblock workbench
-            unique_id = 'workbench-workaround-id'
+            unique_id = "workbench-workaround-id"
         return unique_id
 
     def _publish_grade(self):
@@ -46,11 +47,11 @@ class EventableMixin:
         """
         self.runtime.publish(
             self,
-            'grade',
+            "grade",
             {
-                'value': self.score,
-                'max_value': 1.0,
-            }
+                "value": self.score,
+                "max_value": 1.0,
+            },
         )
 
     def _publish_problem_check(self):
@@ -59,9 +60,9 @@ class EventableMixin:
         """
         self.runtime.publish(
             self,
-            'problem_check',
+            "problem_check",
             {
-                'grade': self.score,
-                'max_grade': 1.0,
-            }
+                "grade": self.score,
+                "max_grade": 1.0,
+            },
         )

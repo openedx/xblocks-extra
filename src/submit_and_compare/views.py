@@ -1,20 +1,21 @@
 """
 Handle view logic for the XBlock
 """
+
 import logging
 
-from django.utils.translation import ngettext
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from lxml import etree
 from six import StringIO
 from xblock.core import XBlock
+
 try:
     from xblock.utils.resources import ResourceLoader
 except ModuleNotFoundError:  # For backward compatibility with releases older than Quince.
     from xblockutils.resources import ResourceLoader
 
 from .mixins.fragment import XBlockFragmentBuilderMixin
-
 
 LOG = logging.getLogger(__name__)
 
@@ -38,8 +39,8 @@ def get_body(xmlstring):
     """
     # pylint: disable=no-member
     tree = etree.parse(StringIO(xmlstring))
-    body = tree.xpath('/submit_and_compare/body')
-    body_string = etree.tostring(body[0], method='text', encoding='unicode')
+    body = tree.xpath("/submit_and_compare/body")
+    body_string = etree.tostring(body[0], method="text", encoding="unicode")
     return body_string
 
 
@@ -49,33 +50,33 @@ def _get_explanation(xmlstring):
     Helper method
     """
     tree = etree.parse(StringIO(xmlstring))
-    explanation = tree.xpath('/submit_and_compare/explanation')
+    explanation = tree.xpath("/submit_and_compare/explanation")
     explanation_string = etree.tostring(
         explanation[0],
-        method='text',
-        encoding='unicode',
+        method="text",
+        encoding="unicode",
     )
     return explanation_string
 
 
 class SubmitAndCompareViewMixin(
-        XBlockFragmentBuilderMixin,
+    XBlockFragmentBuilderMixin,
 ):
     """
     Handle view logic for Image Modal XBlock instances
     """
 
     loader = ResourceLoader(__name__)
-    static_js_init = 'SubmitAndCompareXBlockInitView'
-    icon_class = 'problem'
+    static_js_init = "SubmitAndCompareXBlockInitView"
+    icon_class = "problem"
     editable_fields = [
-        'display_name',
-        'weight',
-        'max_attempts',
-        'your_answer_label',
-        'our_answer_label',
-        'submit_button_label',
-        'question_string',
+        "display_name",
+        "weight",
+        "max_attempts",
+        "your_answer_label",
+        "our_answer_label",
+        "submit_button_label",
+        "question_string",
     ]
     show_in_read_only_mode = True
 
@@ -89,24 +90,24 @@ class SubmitAndCompareViewMixin(
         used_attempts_feedback = self._get_used_attempts_feedback()
         submit_class = self._get_submit_class()
         prompt = get_body(self.question_string)
-        explanation = _get_explanation(
-            self.question_string
+        explanation = _get_explanation(self.question_string)
+        attributes = ""
+        context.update(
+            {
+                "display_name": self.display_name,
+                "problem_progress": problem_progress,
+                "used_attempts_feedback": used_attempts_feedback,
+                "submit_class": submit_class,
+                "prompt": prompt,
+                "student_answer": self.student_answer,
+                "explanation": explanation,
+                "your_answer_label": self.your_answer_label,
+                "our_answer_label": self.our_answer_label,
+                "submit_button_label": self.submit_button_label,
+                "attributes": attributes,
+                "is_past_due": self.is_past_due(),
+            }
         )
-        attributes = ''
-        context.update({
-            'display_name': self.display_name,
-            'problem_progress': problem_progress,
-            'used_attempts_feedback': used_attempts_feedback,
-            'submit_class': submit_class,
-            'prompt': prompt,
-            'student_answer': self.student_answer,
-            'explanation': explanation,
-            'your_answer_label': self.your_answer_label,
-            'our_answer_label': self.our_answer_label,
-            'submit_button_label': self.submit_button_label,
-            'attributes': attributes,
-            'is_past_due': self.is_past_due(),
-        })
         return context
 
     def studio_view(self, context=None):
@@ -116,25 +117,27 @@ class SubmitAndCompareViewMixin(
         Implementation is optional.
         """
         context = context or {}
-        context.update({
-            'display_name': self.display_name,
-            'weight': self.weight,
-            'max_attempts': self.max_attempts,
-            'xml_data': self.question_string,
-            'your_answer_label': self.your_answer_label,
-            'our_answer_label': self.our_answer_label,
-            'submit_button_label': self.submit_button_label,
-        })
-        template = 'edit.html'
+        context.update(
+            {
+                "display_name": self.display_name,
+                "weight": self.weight,
+                "max_attempts": self.max_attempts,
+                "xml_data": self.question_string,
+                "your_answer_label": self.your_answer_label,
+                "our_answer_label": self.our_answer_label,
+                "submit_button_label": self.submit_button_label,
+            }
+        )
+        template = "edit.html"
         fragment = self.build_fragment(
             template=template,
             context=context,
-            js_init='SubmitAndCompareXBlockInitEdit',
+            js_init="SubmitAndCompareXBlockInitEdit",
             css=[
-                'edit.css',
+                "edit.css",
             ],
             js=[
-                'edit.js',
+                "edit.js",
             ],
         )
         return fragment
@@ -145,27 +148,27 @@ class SubmitAndCompareViewMixin(
         Save studio edits
         """
         # pylint: disable=unused-argument
-        self.display_name = data['display_name']
-        self.weight = _convert_to_int(data['weight'])
-        max_attempts = _convert_to_int(data['max_attempts'])
+        self.display_name = data["display_name"]
+        self.weight = _convert_to_int(data["weight"])
+        max_attempts = _convert_to_int(data["max_attempts"])
         if max_attempts >= 0:
-            self.max_attempts = max_attempts    # pylint: disable=consider-using-min-builtin
-        self.your_answer_label = data['your_answer_label']
-        self.our_answer_label = data['our_answer_label']
-        self.submit_button_label = data['submit_button_label']
-        xml_content = data['data']
+            self.max_attempts = max_attempts  # pylint: disable=consider-using-min-builtin
+        self.your_answer_label = data["your_answer_label"]
+        self.our_answer_label = data["our_answer_label"]
+        self.submit_button_label = data["submit_button_label"]
+        xml_content = data["data"]
         # pylint: disable=no-member
         try:
             etree.parse(StringIO(xml_content))
             self.question_string = xml_content
         except etree.XMLSyntaxError as error:
             return {
-                'result': 'error',
-                'message': error.message,
+                "result": "error",
+                "message": error.message,
             }
 
         return {
-            'result': 'success',
+            "result": "success",
         }
 
     @XBlock.json_handler
@@ -180,16 +183,15 @@ class SubmitAndCompareViewMixin(
         if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
             # pylint: enable=no-member
             LOG.error(
-                'User has already exceeded the maximum '
-                'number of allowed attempts',
+                "User has already exceeded the maximum number of allowed attempts",
             )
         elif self.is_past_due():
             LOG.debug(
-                'This problem is past due',
+                "This problem is past due",
             )
         else:
-            self.student_answer = data['answer']
-            if data['action'] == 'submit':
+            self.student_answer = data["answer"]
+            if data["action"] == "submit":
                 self.count_attempts += 1  # pylint: disable=no-member
             if self.student_answer:
                 self.score = 1.0
@@ -199,10 +201,10 @@ class SubmitAndCompareViewMixin(
             self._publish_problem_check()
             success = True
         result = {
-            'success': success,
-            'problem_progress': self._get_problem_progress(),
-            'submit_class': self._get_submit_class(),
-            'used_attempts_feedback': self._get_used_attempts_feedback(),
+            "success": success,
+            "problem_progress": self._get_problem_progress(),
+            "submit_class": self._get_submit_class(),
+            "used_attempts_feedback": self._get_used_attempts_feedback(),
         }
         return result
 
@@ -216,20 +218,20 @@ class SubmitAndCompareViewMixin(
         # pylint: disable=unused-argument
         # pylint: disable=no-member
         tree = etree.parse(StringIO(self.question_string))
-        raw_hints = tree.xpath('/submit_and_compare/demandhint/hint')
+        raw_hints = tree.xpath("/submit_and_compare/demandhint/hint")
         decorated_hints = []
         total_hints = len(raw_hints)
         for i, raw_hint in enumerate(raw_hints, 1):
-            hint = _('Hint ({number} of {total}): {hint}').format(
+            hint = _("Hint ({number} of {total}): {hint}").format(
                 number=i,
                 total=total_hints,
-                hint=etree.tostring(raw_hint, encoding='unicode'),
+                hint=etree.tostring(raw_hint, encoding="unicode"),
             )
             decorated_hints.append(hint)
         hints = decorated_hints
         return {
-            'result': 'success',
-            'hints': hints,
+            "result": "success",
+            "hints": hints,
         }
 
     def _get_used_attempts_feedback(self):
@@ -237,12 +239,12 @@ class SubmitAndCompareViewMixin(
         Returns the text with feedback to the user about the number of attempts
         they have used if applicable
         """
-        result = ''
+        result = ""
         if self.max_attempts > 0:
             # pylint: disable=no-member
             result = ngettext(
-                'You have used {count_attempts} of {max_attempts} submission',
-                'You have used {count_attempts} of {max_attempts} submissions',
+                "You have used {count_attempts} of {max_attempts} submission",
+                "You have used {count_attempts} of {max_attempts} submissions",
                 self.max_attempts,
             ).format(
                 count_attempts=self.count_attempts,
@@ -269,9 +271,9 @@ class SubmitAndCompareViewMixin(
         """
         Returns the css class for the submit button
         """
-        result = ''
+        result = ""
         if not self._can_submit():
-            result = 'nodisplay'
+            result = "nodisplay"
         return result
 
     def _get_problem_progress(self):
@@ -280,12 +282,12 @@ class SubmitAndCompareViewMixin(
         on the user's current score
         """
         if self.weight == 0:
-            result = ''
+            result = ""
         elif self.score == 0.0:
             result = "({})".format(
                 ngettext(
-                    '{weight} point possible',
-                    '{weight} points possible',
+                    "{weight} point possible",
+                    "{weight} points possible",
                     self.weight,
                 ).format(
                     weight=self.weight,
@@ -293,11 +295,11 @@ class SubmitAndCompareViewMixin(
             )
         else:
             scaled_score = self.score * self.weight
-            score_string = f'{scaled_score:g}'
+            score_string = f"{scaled_score:g}"
             result = "({})".format(
                 ngettext(
-                    score_string + '/' + "{weight} point",
-                    score_string + '/' + "{weight} points",
+                    score_string + "/" + "{weight} point",
+                    score_string + "/" + "{weight} points",
                     self.weight,
                 ).format(
                     weight=self.weight,

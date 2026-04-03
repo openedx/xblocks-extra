@@ -2,9 +2,10 @@
 """
 Test basic XBlock display function
 """
-import unittest
 
+import unittest
 from unittest.mock import Mock
+
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
 
@@ -15,7 +16,7 @@ def make_an_xblock(**kwargs):
     """
     Helper method that creates a Free-text Response XBlock
     """
-    course_id = SlashSeparatedCourseKey('foo', 'bar', 'baz')
+    course_id = SlashSeparatedCourseKey("foo", "bar", "baz")
     runtime = Mock(
         course_id=course_id,
         service=Mock(
@@ -43,9 +44,9 @@ class TestRender(unittest.TestCase):
         student_view = self.xblock.student_view()
         html = student_view.content
         self.assertIsNotNone(html)
-        self.assertNotEqual('', html)
-        self.assertIn('imagemodal_block', html)
+        self.assertNotEqual("", html)
+        self.assertIn("imagemodal_block", html)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

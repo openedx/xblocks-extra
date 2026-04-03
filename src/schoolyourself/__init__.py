@@ -1,2 +1,2 @@
-from .schoolyourself_lesson import SchoolYourselfLessonXBlock
-from .schoolyourself_review import SchoolYourselfReviewXBlock
+from .schoolyourself_lesson import SchoolYourselfLessonXBlock as SchoolYourselfLessonXBlock
+from .schoolyourself_review import SchoolYourselfReviewXBlock as SchoolYourselfReviewXBlock
