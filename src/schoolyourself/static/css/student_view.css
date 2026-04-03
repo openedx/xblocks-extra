@@ -1,0 +1,137 @@
+.schoolyourself-lesson {
+  padding: 40px;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 300;
+  color: #6eb535;
+  background: #fafafa;
+  font-size: 0;
+  text-align: center;
+}
+
+
+.schoolyourself-lesson-block {
+  display: inline-block;
+  cursor: hand;
+  cursor: pointer;
+  vertical-align: top;
+  text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+
+.schoolyourself-lesson-screenshot,
+.schoolyourself-review-screenshot {
+  margin-top: 10px;
+  margin-right: 20px;
+  box-shadow: 0px 0px 3px 1px #c1c1c1;
+  opacity: 0.8;
+  -webkit-transition: opacity 150ms linear;
+  -moz-transition: opacity 150ms linear;
+  -ms-transition: opacity 150ms linear;
+  -o-transition: opacity 150ms linear;
+  transition: opacity 150ms linear;
+  border: 2px solid #6eb535;
+  border-radius: 2px;
+  text-align: center;
+  background: #fff;
+
+  display: inline-block;
+  width: 256px;
+  height: 192px;
+  margin: 0;
+}
+
+.schoolyourself-review-screenshot {
+  width: 200px;
+  height: auto;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.schoolyourself-lesson-screenshot > img,
+.schoolyourself-review-screenshot > img {
+  display: inline-block;
+  vertical-align: middle;
+  width: 100%;
+}
+
+.schoolyourself-lesson-block:hover .schoolyourself-lesson-screenshot,
+.schoolyourself-lesson-block:hover .schoolyourself-review-screenshot {
+  opacity: 1;
+}
+
+
+.schoolyourself-lesson-text {
+  display: inline-block;
+  text-align: left;
+  vertical-align: top;
+  padding-left: 40px;
+  overflow: hidden;
+  max-width: 320px;
+}
+
+.schoolyourself-lesson-title,
+.schoolyourself-lesson-title a,
+.schoolyourself-lesson-title a:visited {
+  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 300;
+  color: #6eb535;
+  text-decoration: none;
+  margin-bottom: 0 !important;
+  margin-top: 0;
+}
+.schoolyourself-lesson-block:hover .schoolyourself-lesson-title {
+  color: #6eb535;
+  text-decoration: underline;
+}
+
+
+.schoolyourself-lesson-description {
+  color: #737c95;
+  font-size: 21px;
+  margin-bottom: 5px;
+}
+
+.schoolyourself-review-mastery {
+  margin-top: 20px;
+  height: 44px;
+  color: #737c95;
+  font-size: 16px;
+  margin-bottom: 5px;
+  max-width: 320px;
+}
+
+.schoolyourself-review-mastery-text {
+  height: 24px;
+}
+
+.schoolyourself-review-mastery-bar {
+  width: 320px;
+  background: #ddd;
+  height: 20px;
+  position: relative;
+
+  -webkit-transition: background 450ms ease-in-out;
+  -moz-transition: background 450ms ease-in-out;
+  -ms-transition: background 450ms ease-in-out;
+  -o-transition: background 450ms ease-in-out;
+  transition: background 450ms ease-in-out;
+}
+
+.schoolyourself-review-mastery-bar-filler {
+  position: absolute;
+  background: #fcd380;
+  left: 0;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+
+  -webkit-transition: all 450ms ease-in-out;
+  -moz-transition: all 450ms ease-in-out;
+  -ms-transition: all 450ms ease-in-out;
+  -o-transition: all 450ms ease-in-out;
+  transition: all 450ms ease-in-out;
+}
