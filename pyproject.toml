@@ -61,8 +61,6 @@ docs = [
 audio = "audio:AudioXBlock"
 imagemodal = "imagemodal.xblocks:ImageModal"
 submit-and-compare = "submit_and_compare.xblocks:SubmitAndCompareXBlock"
-schoolyourself_lesson = "schoolyourself:SchoolYourselfLessonXBlock"
-schoolyourself_review = "schoolyourself:SchoolYourselfReviewXBlock"
 
 # Packages live in src/ but are installed without the src prefix
 # e.g., src/foo_xblock/ is installed as foo_xblock
