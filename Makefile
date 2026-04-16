@@ -1,18 +1,24 @@
-.PHONY: help lint format test docs clean
+.PHONY: help requirements upgrade lint format test docs clean
 
 help:  ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
+requirements:  ## Sync dev dependencies
+	uv sync
+
+upgrade:  ## Upgrade python dependencies
+	uv lock --upgrade
+
 lint:  ## Run linting checks
-	ruff check .
-	ruff format --check .
+	uv run ruff check .
+	uv run ruff format --check .
 
 format:  ## Auto-fix formatting issues
-	ruff check --fix .
-	ruff format .
+	uv run ruff check --fix .
+	uv run ruff format .
 
 test:  ## Run tests with pytest
-	pytest
+	uv run pytest
 
 docs:  ## Build documentation
 	$(MAKE) -C docs html

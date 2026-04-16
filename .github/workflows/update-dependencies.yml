@@ -1,0 +1,35 @@
+name: Update Dependencies
+
+on:
+  schedule:
+    - cron: "15 15 1/14 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+
+    - name: Update uv.lock
+      run: uv lock --upgrade
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.REQUIREMENTS_BOT_GITHUB_TOKEN }}
+        commit-message: "chore: update uv.lock with latest dependency versions"
+        title: "chore: update dependencies"
+        body: "Automated dependency update via `uv lock --upgrade`."
+        branch: "chore/update-dependencies"
+        delete-branch: true
