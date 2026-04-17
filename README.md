@@ -4,18 +4,22 @@ A collection of XBlocks for the Open edX platform.
 
 ## Purpose
 
-This repository contains XBlocks that are not installed by default in the Open edX platform but can be added as needed. XBlocks added here **preserve their original package paths** for drop-in replacement when migrating from standalone packages.
+This repository serves as the consolidated home for several previously standalone XBlock packages, brought together to streamline maintenance and simplify dependency management. These XBlocks are not installed by default in the Open edX platform but can be added as needed. Each XBlock **preserves its original package path** to serve as a drop-in replacement when migrating from the standalone packages.
+
+The following XBlocks have been migrated here from their respective repositories:
+
+- [AudioXBlock](src/audio/README.md) migrated [from](https://github.com/openedx-unsupported/AudioXBlock)
+- [FeedbackXBlock](src/feedback/README.rst) migrated [from](https://github.com/openedx/FeedbackXBlock)
+- [xblock-image-modal](src/imagemodal/README.rst) migrated [from](https://github.com/openedx-unsupported/xblock-image-modal)
+- [xblock-qualtrics-survey](src/qualtricssurvey/README.rst) migrated [from](https://github.com/openedx-unsupported/xblock-qualtrics-survey)
+- [xblock-sql-grader](src/sql_grader/README.rst) migrated [from](https://github.com/openedx/xblock-sql-grader)
+- [xblock-submit-and-compare](src/submit_and_compare/README.md) migrated [from](https://github.com/openedx-unsupported/xblock-submit-and-compare)
+
 
 ## Installation
 
 ```bash
 pip install xblocks-extra
-```
-
-Or install specific xblocks by adding to your requirements:
-
-```
-xblocks-extra
 ```
 
 ## Development
