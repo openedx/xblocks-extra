@@ -1,5 +1,12 @@
 .PHONY: help requirements upgrade lint format test docs clean
 
+
+SRC_DIRECTORY := src
+EXTRACT_DIR := $(SRC_DIRECTORY)/conf/locale/en/LC_MESSAGES
+# XBlock directories
+XBLOCKS=$(shell find $(shell pwd)/$(SRC_DIRECTORY) -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
+
+
 help:  ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
@@ -32,3 +39,55 @@ clean:  ## Clean build artifacts
 	rm -rf docs/_build/
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
+
+## Localization targets
+
+extract_translations: ## extract strings to be translated, outputting .po files for each XBlock
+	@for xblock in $(XBLOCKS); do \
+		echo "Extracting translations for $$xblock..."; \
+		cd $$xblock && i18n_tool extract --no-segment --merge-po-files; \
+		if [ -f $(EXTRACT_DIR)/django.po ]; then \
+			mv $(EXTRACT_DIR)/django.po $(EXTRACT_DIR)/text.po; \
+		fi; \
+	done
+
+compile_translations: ## compile translation files, outputting .mo files for each supported language for each XBlock
+	django-admin compilemessages --locale en
+
+detect_changed_source_translations:
+	@for xblock in $(XBLOCKS); do \
+		echo "Detecting changed translations for $$xblock..."; \
+		cd $$xblock && i18n_tool changed; \
+	done
+
+dummy_translations: ## generate dummy translation (.po) files for each XBlock
+	@for xblock in $(XBLOCKS); do \
+		echo "Generating dummy translations for $$xblock..."; \
+		cd $$xblock && i18n_tool dummy; \
+	done
+
+build_dummy_translations: dummy_translations compile_translations ## generate and compile dummy translation files
+
+validate_translations: build_dummy_translations detect_changed_source_translations ## validate translations
+
+pull_translations: ## pull translations from Transifex for each XBlock
+	@for xblock in $(XBLOCKS); do \
+		echo "Pulling translations for $$xblock..."; \
+		cd $$xblock && i18n_tool transifex pull; \
+	done
+
+push_translations: extract_translations ## push translations to Transifex for each XBlock
+	@for xblock in $(XBLOCKS); do \
+		echo "Pushing translations for $$xblock..."; \
+		cd $$xblock && i18n_tool transifex push; \
+	done
+
+install_transifex_client: ## Install the Transifex client
+	# Instaling client will skip CHANGELOG and LICENSE files from git changes
+	# so remind the user to commit the change first before installing client.
+	git diff -s --exit-code HEAD || { echo "Please commit changes first."; exit 1; }
+	curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
+	git checkout -- LICENSE README.md ## overwritten by Transifex installer
+
+selfcheck: ## check that the Makefile is well-formed
+	@echo "The Makefile is well-formed."
