@@ -1,10 +1,14 @@
 .PHONY: help requirements upgrade lint format test docs clean
+.PHONY: extract_translations compile_translations
+.PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
+.PHONY: validate_translations pull_translations push_translations install_transifex_client
 
 
 SRC_DIRECTORY := src
-EXTRACT_DIR := $(SRC_DIRECTORY)/conf/locale/en/LC_MESSAGES
+EXTRACT_DIR := conf/locale/en/LC_MESSAGES
+COMBINED_LOCALE_DIR := conf/locale/en/LC_MESSAGES
 # XBlock directories
-XBLOCKS=$(shell find $(shell pwd)/$(SRC_DIRECTORY) -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
+XBLOCKS=$(shell find $(shell pwd)/$(SRC_DIRECTORY) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
 
 
 help:  ## Show this help message
