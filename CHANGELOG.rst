@@ -13,11 +13,3 @@ Change Log
 
 Unreleased
 **********
-
-0.0.1 - 2026-04-17
-**********************************************
-
-Fixed
-=====
-
-* Add change log notes here
