@@ -1,5 +1,5 @@
-Migrating XBlocks to xblocks-extra
-==================================
+Migration process to move XBlocks code to xblocks-extra
+=======================================================
 
 This guide explains how to migrate an existing XBlock into this repository while
 preserving its original package path for drop-in replacement.
