@@ -15,6 +15,12 @@ The following XBlocks have been migrated here from their respective repositories
 - [xblock-sql-grader](src/sql_grader/README.rst) migrated [from](https://github.com/openedx/xblock-sql-grader)
 - [xblock-submit-and-compare](src/submit_and_compare/README.md) migrated [from](https://github.com/openedx-unsupported/xblock-submit-and-compare)
 
+## Migrating from Standalone Packages
+
+If you currently have any of the standalone packages listed above
+installed, you should migrate to `xblocks-extra`. 
+See the [Migration Guide](docs/how-tos/migrating-process-operator-guidelines.rst) for the instructions.
+
 
 ## Installation
 
