@@ -21,8 +21,7 @@ its XBlock under the entry point key ``submit-and-compare``, importable as
 ``submit_and_compare.xblocks:SubmitAndCompareXBlock`` — both are unchanged in
 ``xblocks-extra``.
 
-For further details on the migration process, see
-:doc:`migration-process-developer-guidelines`.
+For further details on the migration process, see :doc:`migration-process-developer-guidelines`.
 
 
 Before You Migrate
