@@ -31,6 +31,9 @@ format:  ## Auto-fix formatting issues
 test:  ## Run tests with pytest
 	uv run pytest
 
+test-with-coverage:  ## Run tests with coverage reporting
+	uv run pytest --cov=$(SRC_DIRECTORY) --cov-report=xml
+
 docs:  ## Build documentation
 	$(MAKE) -C docs html
 
