@@ -63,46 +63,5 @@ extract_translations: ## extract strings to be translated, outputting .po files 
 		cp $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
 	done
 
-compile_translations: ## compile translation files, outputting .mo files for each supported language for each XBlock
-	@for xblock in $(XBLOCKS); do \
-		echo "Compiling translations for $$xblock..."; \
-		cd $$xblock && django-admin compilemessages --locale en; \
-	done
-
-detect_changed_source_translations:
-	@for xblock in $(XBLOCKS); do \
-		echo "Detecting changed translations for $$xblock..."; \
-		cd $$xblock && i18n_tool changed; \
-	done
-
-dummy_translations: ## generate dummy translation (.po) files for each XBlock
-	@for xblock in $(XBLOCKS); do \
-		echo "Generating dummy translations for $$xblock..."; \
-		cd $$xblock && i18n_tool dummy; \
-	done
-
-build_dummy_translations: extract_translations dummy_translations compile_translations ## generate and compile dummy translation files
-
-validate_translations: build_dummy_translations detect_changed_source_translations ## validate translations
-
-pull_translations: ## pull translations from Transifex for each XBlock
-	@for xblock in $(XBLOCKS); do \
-		echo "Pulling translations for $$xblock..."; \
-		cd $$xblock && i18n_tool transifex pull; \
-	done
-
-push_translations: extract_translations ## push translations to Transifex for each XBlock
-	@for xblock in $(XBLOCKS); do \
-		echo "Pushing translations for $$xblock..."; \
-		cd $$xblock && i18n_tool transifex push; \
-	done
-
-install_transifex_client: ## Install the Transifex client
-	# Instaling client will skip CHANGELOG and LICENSE files from git changes
-	# so remind the user to commit the change first before installing client.
-	git diff -s --exit-code HEAD || { echo "Please commit changes first."; exit 1; }
-	curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
-	git checkout -- LICENSE README.md ## overwritten by Transifex installer
-
 selfcheck: ## check that the Makefile is well-formed
 	@echo "The Makefile is well-formed."
