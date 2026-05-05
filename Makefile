@@ -4,11 +4,12 @@
 .PHONY: validate_translations pull_translations push_translations install_transifex_client
 
 
+REPO_ROOT := $(shell pwd)
 SRC_DIRECTORY := src
 EXTRACT_DIR := conf/locale/en/LC_MESSAGES
 COMBINED_LOCALE_DIR := conf/locale/en/LC_MESSAGES
 # XBlock directories
-XBLOCKS=$(shell find $(shell pwd)/$(SRC_DIRECTORY) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
+XBLOCKS=$(shell find $(REPO_ROOT)/$(SRC_DIRECTORY) -mindepth 2 -maxdepth 2 -type d -name 'conf' -exec dirname {} \;)
 
 
 help:  ## Show this help message
@@ -49,13 +50,17 @@ clean:  ## Clean build artifacts
 
 ## Localization targets
 
-extract_translations: ## extract strings to be translated, outputting .po files for each XBlock
+extract_translations: ## extract strings to be translated, outputting .po files under <module_name>/conf/locale/
 	@for xblock in $(XBLOCKS); do \
-		echo "Extracting translations for $$xblock..."; \
+		module_name=$$(basename $$xblock); \
+		echo "Extracting translations for $$module_name..."; \
 		cd $$xblock && i18n_tool extract --no-segment; \
 		if [ -f $$xblock/$(EXTRACT_DIR)/djangojs.po ]; then \
-			cd $$xblock/$(EXTRACT_DIR) && msgcat django.po djangojs.po -o django.po && rm -f djangojs.po; \
+			msgcat $$xblock/$(EXTRACT_DIR)/django.po $$xblock/$(EXTRACT_DIR)/djangojs.po \
+				-o $$xblock/$(EXTRACT_DIR)/django.po && rm -f $$xblock/$(EXTRACT_DIR)/djangojs.po; \
 		fi; \
+		mkdir -p $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR); \
+		cp $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
 	done
 
 compile_translations: ## compile translation files, outputting .mo files for each supported language for each XBlock
