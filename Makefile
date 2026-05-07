@@ -60,7 +60,9 @@ extract_translations: ## extract strings to be translated, outputting .po files 
 				-o $$xblock/$(EXTRACT_DIR)/django.po && rm -f $$xblock/$(EXTRACT_DIR)/djangojs.po; \
 		fi; \
 		mkdir -p $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR); \
-		cp $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
+		if [ -f $$xblock/$(EXTRACT_DIR)/django.po ]; then \
+ 			cp $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
+		fi; \
 	done
 
 selfcheck: ## check that the Makefile is well-formed
