@@ -61,7 +61,7 @@ extract_translations: ## extract strings to be translated, outputting .po files 
 		fi; \
 		mkdir -p $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR); \
 		if [ -f $$xblock/$(EXTRACT_DIR)/django.po ]; then \
- 			cp $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
+ 			mv $$xblock/$(EXTRACT_DIR)/django.po $(REPO_ROOT)/$$module_name/$(EXTRACT_DIR)/django.po; \
 		fi; \
 	done
 
