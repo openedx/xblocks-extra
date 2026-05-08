@@ -1,7 +1,5 @@
-.PHONY: help requirements upgrade lint format test docs clean
-.PHONY: extract_translations compile_translations
-.PHONY: detect_changed_source_translations dummy_translations build_dummy_translations
-.PHONY: validate_translations pull_translations push_translations install_transifex_client
+.PHONY: help requirements upgrade lint format test test-with-coverage docs clean
+.PHONY: extract_translations
 
 
 REPO_ROOT := $(shell pwd)
