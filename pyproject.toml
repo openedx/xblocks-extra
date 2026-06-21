@@ -39,9 +39,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/openedx/xblocks-extra"
 Repository = "https://github.com/openedx/xblocks-extra"
-Documentation = "https://xblocks-extra.readthedocs.io"
 
 [project.optional-dependencies]
 dev = [
