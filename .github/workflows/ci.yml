@@ -21,11 +21,11 @@ jobs:
           enable-cache: true
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: uv sync --extra dev
+      - name: Install tox
+        run: uv tool install tox --with tox-uv
 
       - name: Run linting
-        run: make lint
+        run: tox -e lint
 
   test:
     name: Test (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
@@ -46,13 +46,14 @@ jobs:
           enable-cache: true
           python-version: "${{ matrix.python-version }}"
 
-      - name: Install dependencies
-        run: | 
-          uv lock --upgrade-package "django==${{ matrix.django-version }}.*"
-          uv sync --extra test
+      - name: Pin Django version
+        run: uv lock --upgrade-package "django==${{ matrix.django-version }}.*"
+
+      - name: Install tox
+        run: uv tool install tox --with tox-uv
 
       - name: Run tests with coverage
-        run: make test-with-coverage
+        run: tox -e test
 
       - name: Upload coverage to Codecov
         if: matrix.django-version == '4.2'
