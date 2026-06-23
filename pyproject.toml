@@ -78,6 +78,10 @@ doc = [
     "sphinx",
     "sphinx-book-theme",
 ]
+ci = [
+    "tox",
+    "tox-uv",
+]
 
 [project.entry-points."xblock.v1"]
 audio = "audio:AudioXBlock"
