@@ -49,10 +49,12 @@ dev = [
     "ruff",
     "edx-i18n-tools",
 ]
-test = [
+
+[dependency-groups]
+# Base test packages, no Django version pinned
+test-base = [
     "coverage",
     "edx-lint",
-    "edx-opaque-keys",
     "edx-opaque-keys",
     "mock",
     "pytest-cov",
@@ -60,7 +62,19 @@ test = [
     "pytest>=7.0",
     "xblock-sdk",
 ]
-docs = [
+# Default test group: current supported Django version
+# Update Django pin here when bumping the default; add a legacy group for older versions
+test = [
+    {include-group = "test-base"},
+    "Django>=5.2,<6.0",
+]
+# Legacy Django 4.2 support
+django42 = [
+    {include-group = "test-base"},
+    "Django>=4.2,<5.0",
+]
+doc = [
+    {include-group = "test"},
     "sphinx",
     "sphinx-book-theme",
 ]
@@ -172,6 +186,13 @@ directory = "htmlcov"
 # https://docs.astral.sh/uv/reference/settings/
 [tool.uv]
 package = true
+conflicts = [
+    [
+        {group = "test"},
+        {group = "django42"},
+        {group = "doc"},
+    ],
+]
 
 # Setuptools SCM configuration
 # https://setuptools-scm.readthedocs.io/

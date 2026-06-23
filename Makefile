@@ -27,8 +27,8 @@ format:  ## Auto-fix formatting issues
 	uv run ruff check --fix .
 	uv run ruff format .
 
-test:  ## Run tests with coverage reporting
-	tox -e test
+test:  ## Run tests against all supported Python/Django combinations
+	tox -e "py312-django{42,52}"
 
 docs:  ## Build documentation
 	tox -e docs
