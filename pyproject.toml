@@ -39,9 +39,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/openedx/xblocks-extra"
 Repository = "https://github.com/openedx/xblocks-extra"
-Documentation = "https://xblocks-extra.readthedocs.io"
 
 [project.optional-dependencies]
 dev = [
@@ -54,8 +52,10 @@ dev = [
 # Base test packages, no Django version pinned
 test-base = [
     "coverage",
+    "ddt",
     "edx-lint",
     "edx-opaque-keys",
+    "lazy",
     "mock",
     "pytest-cov",
     "pytest-django",
@@ -82,6 +82,7 @@ doc = [
 [project.entry-points."xblock.v1"]
 audio = "audio:AudioXBlock"
 feedback = "feedback.feedback:FeedbackXBlock"
+freetextresponse = "freetextresponse.xblocks:FreeTextResponse"
 imagemodal = "imagemodal.xblocks:ImageModal"
 qualtricssurvey = "qualtricssurvey.xblocks:QualtricsSurvey"
 sql_grader = "sql_grader:SqlGrader"
@@ -119,6 +120,7 @@ exclude = ["tests*", "*.tests", "*.tests.*"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+src = ["src"]
 
 [tool.ruff.lint]
 select = [
@@ -136,7 +138,6 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = []
 known-third-party = ["django", "xblock"]
 
 [tool.ruff.format]
@@ -149,9 +150,10 @@ indent-style = "space"
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-testpaths = ["tests", "src"]
+testpaths = ["src"]
+pythonpath = ["src"]
 addopts = "-v --tb=short"
-DJANGO_SETTINGS_MODULE = "feedback.settings.test"
+DJANGO_SETTINGS_MODULE = "tests.settings"
 
 # Coverage configuration
 # https://coverage.readthedocs.io/en/latest/config.html
@@ -159,7 +161,7 @@ DJANGO_SETTINGS_MODULE = "feedback.settings.test"
 branch = true
 # Source paths will be added as xblocks are migrated
 # Example: source = ["foo_xblock", "bar_xblock"]
-source = ["sql_grader"]
+source = ["src"]
 omit = [
     "*/tests/*",
     "*/migrations/*",
