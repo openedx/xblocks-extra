@@ -1,4 +1,4 @@
-.PHONY: help requirements upgrade lint format test test-with-coverage docs clean
+.PHONY: help requirements upgrade lint format test docs clean
 .PHONY: extract_translations
 
 
@@ -15,26 +15,23 @@ help:  ## Show this help message
 
 requirements:  ## Sync dev dependencies
 	uv sync
+	uv tool install tox --with tox-uv
 
 upgrade:  ## Upgrade python dependencies
 	uv lock --upgrade
 
 lint:  ## Run linting checks
-	uv run ruff check .
-	uv run ruff format --check .
+	tox -e lint
 
 format:  ## Auto-fix formatting issues
 	uv run ruff check --fix .
 	uv run ruff format .
 
-test:  ## Run tests with pytest
-	uv run pytest
-
-test-with-coverage:  ## Run tests with coverage reporting
-	uv run pytest --cov=$(SRC_DIRECTORY) --cov-report=xml
+test:  ## Run tests against all supported Python/Django combinations
+	tox -e "py312-django{42,52}"
 
 docs:  ## Build documentation
-	$(MAKE) -C docs html
+	tox -e docs
 
 clean:  ## Clean build artifacts
 	rm -rf build/
