@@ -196,7 +196,6 @@ conflicts = [
     [
         {group = "test"},
         {group = "django42"},
-        {group = "doc"},
     ],
 ]
 
