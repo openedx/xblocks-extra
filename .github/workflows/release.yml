@@ -39,6 +39,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
+          # Do not push a version/changelog commit back to `main`. The branch is
+          # protected (requires the "openedx/cla" status check), so a bot push is
+          # rejected with GH006. The package version is derived from git tags via
+          # setuptools-scm, so no in-repo commit is needed — only the tag and the
+          # GitHub Release, neither of which is blocked by branch protection.
+          commit: "false"
 
       - name: Upload to GitHub Release Assets
         uses: python-semantic-release/publish-action@5a5718ce47b892ef699f2972dae122297771d641 # v10.6.1
