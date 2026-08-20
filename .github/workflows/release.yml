@@ -41,6 +41,13 @@ jobs:
           git_committer_email: "actions@users.noreply.github.com"
           changelog: "false"
 
+      - name: Upload to GitHub Release Assets
+        uses: python-semantic-release/publish-action@5a5718ce47b892ef699f2972dae122297771d641 # v10.6.1
+        if: steps.release.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}
+
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: steps.release.outputs.released == 'true'
