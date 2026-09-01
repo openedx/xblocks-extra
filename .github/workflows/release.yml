@@ -34,19 +34,38 @@ jobs:
 
       - name: Run Semantic Release
         id: release
-        uses: python-semantic-release/python-semantic-release@39dd2052f2ce8282a5d932c31d58a2ca06d2550e # v10.6.1
+        uses: python-semantic-release/python-semantic-release@9a026e9303981c866c3425723009becb2437c757 # v10.6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
           changelog: "false"
+          # Commit, tag, push and build, but don't create the GitHub release.
+          # We create it ourselves in the next step so that the distributions
+          # are attached before the release is published. See that step for why.
+          vcs_release: "false"
 
-      - name: Upload to GitHub Release Assets
-        uses: python-semantic-release/publish-action@310a9983a0ae878b29f3aac778d7c77c1db27378 # v10.5.3
+      # This repo has immutable releases enabled, which freezes a release's
+      # assets the moment it is published, so assets cannot be attached
+      # afterwards. `gh release create` handles this by creating the release as
+      # a draft, uploading the assets, and only then publishing it:
+      # https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases
+      - name: Create GitHub Release with Assets
         if: steps.release.outputs.released == 'true'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.release.outputs.tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Reuse the release notes python-semantic-release generated for us.
+          RELEASE_NOTES: ${{ steps.release.outputs.release_notes }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          # Output the release notes to a file
+          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/release_notes.md"
+          # Create a draft release, upload the assets, then publish it.
+          gh release create "$TAG" \
+            --verify-tag \
+            --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/release_notes.md" \
+            dist/*
 
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -76,5 +95,6 @@ jobs:
           name: distribution-artifacts
           path: dist
 
+      # Publishes to PyPI via OIDC trusted publishing (no API token required).
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
