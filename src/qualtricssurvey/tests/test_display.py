@@ -8,17 +8,34 @@ from unittest import mock
 
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from xblock.field_data import DictFieldData
+from xblock.reference.user_service import XBlockUser
 
 from qualtricssurvey.xblocks import QualtricsSurvey
 
 
-def mock_an_xblock(field_overrides=None, user_service=None, xblock_settings=None):
+def make_user(user_id="12345", anonymous_id="anon-user-id", username="jdoe", emails=None):
+    """
+    Build an XBlockUser the way edx-platform does for an authenticated user.
+
+    Pass ``None`` for any attribute to leave it unset, as happens for
+    anonymous visitors.
+    """
+    user = XBlockUser(is_current_user=True, emails=emails)
+    opt_attrs = {
+        "edx-platform.user_id": user_id,
+        "edx-platform.anonymous_user_id": anonymous_id,
+        "edx-platform.username": username,
+    }
+    user.opt_attrs = {key: value for key, value in opt_attrs.items() if value is not None}
+    return user
+
+
+def mock_an_xblock(field_overrides=None, user=None, xblock_settings=None):
     """
     Create and return an instance of the XBlock
     """
     course_id = SlashSeparatedCourseKey("foo", "bar", "baz")
     runtime = mock.Mock(course_id=course_id)
-    runtime.anonymous_student_id = "anon-user-id"
 
     i18n_service = mock.Mock()
     i18n_service.ugettext.side_effect = lambda text: text
@@ -27,8 +44,11 @@ def mock_an_xblock(field_overrides=None, user_service=None, xblock_settings=None
     settings_service = mock.Mock()
     settings_service.get_settings_bucket.return_value = xblock_settings or {}
 
+    user_service = mock.Mock()
+    user_service.get_current_user.return_value = user if user is not None else make_user()
+
     def service(_block, service_name):
-        if service_name == "user" and user_service is not None:
+        if service_name == "user":
             return user_service
         if service_name == "i18n":
             return i18n_service
@@ -40,9 +60,7 @@ def mock_an_xblock(field_overrides=None, user_service=None, xblock_settings=None
     scope_ids = mock.Mock()
     scope_ids.usage_id = "usage-id"
     field_data = DictFieldData(field_overrides or {})
-    xblock = QualtricsSurvey(runtime, field_data, scope_ids)
-    xblock.xmodule_runtime = runtime
-    return xblock
+    return QualtricsSurvey(runtime, field_data, scope_ids)
 
 
 class TestRender(unittest.TestCase):
@@ -91,31 +109,8 @@ class TestRender(unittest.TestCase):
         uses the configured mapping instead of legacy param_name.
         """
         xblock = mock_an_xblock(
-            xblock_settings={
-                "USER_QUERY_PARAMS": {
-                    "edxuid": "user_id",
-                    "email": "email",
-                },
-            }
-        )
-        content = xblock.student_view().content
-        self.assertIn("?edxuid=anon-user-id", content)
-        self.assertNotIn("a=", content)
-
-    def test_student_view_with_user_service(self):
-        """
-        Checks the student view when the runtime provides user information
-        and USER_QUERY_PARAMS is configured.
-        """
-        user = mock.Mock()
-        user.user_id = None
-        user.opt_attrs = {"edx-platform.user_id": "12345"}
-        user.emails = ["user@example.com"]
-        user_service = mock.Mock()
-        user_service.get_current_user.return_value = user
-        xblock = mock_an_xblock(
             field_overrides={"extra_params": "foo=bar&baz="},
-            user_service=user_service,
+            user=make_user(emails=["user@example.com"]),
             xblock_settings={
                 "USER_QUERY_PARAMS": {
                     "edxuid": "user_id",
@@ -128,19 +123,54 @@ class TestRender(unittest.TestCase):
         self.assertIn("&amp;email=user%40example.com", content)
         self.assertIn("&amp;foo=bar", content)
         self.assertIn("&amp;baz=", content)
+        self.assertNotIn("a=", content)
+
+    def test_user_id_falls_back_to_anonymous_id(self):
+        """
+        When edx-platform.user_id is absent, user_id resolves to the
+        anonymous ID instead.
+        """
+        xblock = mock_an_xblock(
+            user=make_user(user_id=None),
+            xblock_settings={"USER_QUERY_PARAMS": {"edxuid": "user_id"}},
+        )
+        content = xblock.student_view().content
+        self.assertIn("?edxuid=anon-user-id", content)
+
+    def test_anonymous_visitor_sends_nothing(self):
+        """
+        edx-platform sets no identifying opt_attrs and no emails for
+        unauthenticated users, so every user param is skipped.
+        """
+        xblock = mock_an_xblock(
+            user=XBlockUser(is_current_user=True),
+            xblock_settings={
+                "USER_QUERY_PARAMS": {
+                    "edxuid": "user_id",
+                    "anon": "anonymous_id",
+                    "email": "email",
+                    "uname": "username",
+                },
+            },
+        )
+        content = xblock.student_view().content
+        self.assertNotIn("?", content)
+
+    def test_no_user_service_sends_nothing(self):
+        """
+        A runtime without a user service yields no user params.
+        """
+        xblock = mock_an_xblock(xblock_settings={"USER_QUERY_PARAMS": {"edxuid": "user_id"}})
+        xblock.runtime.service = mock.Mock(return_value=None)
+        content = xblock.student_view().content
+        self.assertNotIn("?", content)
 
     def test_custom_user_query_params(self):
         """
         USER_QUERY_PARAMS controls which user attributes are sent.
         """
-        user = mock.Mock()
-        user.user_id = "99"
-        user.opt_attrs = {"edx-platform.username": "jdoe"}
-        user.emails = ["j@example.com"]
-        user_service = mock.Mock()
-        user_service.get_current_user.return_value = user
         xblock = mock_an_xblock(
-            user_service=user_service,
+            user=make_user(user_id="99", emails=["j@example.com"]),
             xblock_settings={
                 "USER_QUERY_PARAMS": {
                     "uid": "user_id",
@@ -192,7 +222,7 @@ class TestRender(unittest.TestCase):
         )
         content = xblock.student_view().content
         self.assertNotIn("x=", content)
-        self.assertIn("edxuid=anon-user-id", content)
+        self.assertIn("edxuid=12345", content)
 
     def test_param_name_backward_compat(self):
         """
@@ -212,7 +242,7 @@ class TestRender(unittest.TestCase):
             xblock_settings={"USER_QUERY_PARAMS": {"edxuid": "user_id"}},
         )
         content = xblock.student_view().content
-        self.assertIn("edxuid=anon-user-id", content)
+        self.assertIn("edxuid=12345", content)
         self.assertNotIn("a=", content)
 
     def test_university_from_settings_fallback(self):
@@ -256,7 +286,7 @@ class TestRender(unittest.TestCase):
             xblock_settings={"USER_QUERY_PARAMS": {"edxuid": "user_id"}},
         )
         content = xblock.student_view().content
-        self.assertIn("?edxuid=anon-user-id", content)
+        self.assertIn("?edxuid=12345", content)
         self.assertIn("&amp;course=CS+101", content)
         self.assertIn("&amp;blank=", content)
 
