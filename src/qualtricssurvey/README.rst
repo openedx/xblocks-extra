@@ -58,12 +58,88 @@ Using the Studio editor, you can edit the following fields:
 - survey id
 - university
 - link text
+- extra parameters
 - message
-- parameter name for userid
 
-Note: If you plan to make use of the "Param Name" field to store User ID
-data, you will need to configure your Qualtrics surveys to in turn
-collect that data on Qualtrics' end.
+Configuration
+~~~~~~~~~~~~~
+
+Operators can configure system-wide defaults via ``XBLOCK_SETTINGS`` in
+the Django settings:
+
+.. code-block:: python
+
+    XBLOCK_SETTINGS["QualtricsSurvey"] = {
+        "DEFAULT_UNIVERSITY": "stanforduniversity",
+        "USER_QUERY_PARAMS": {
+            "edxuid": "user_id",
+            "email": "email",
+        },
+    }
+
+``DEFAULT_UNIVERSITY``
+    The default Qualtrics subdomain for your institution. Used when the
+    per-instance university field is left blank.
+
+``USER_QUERY_PARAMS``
+    A mapping of URL parameter names to user attributes. The key is the
+    query parameter name that appears in the survey URL, and the value is
+    the user attribute to resolve. Supported attributes:
+
+    - ``user_id`` - platform user ID (with fallback to anonymous ID)
+    - ``anonymous_id`` - course-specific anonymous user ID
+    - ``email`` - primary email address
+    - ``username`` - platform username
+
+    These values come from the XBlock user service. edx-platform only
+    provides them for authenticated users, so any attribute that cannot be
+    resolved (for example, for an anonymous visitor) is left out of the URL.
+
+    If ``USER_QUERY_PARAMS`` is not configured, no user parameters are
+    sent by default. To start sending user data to Qualtrics, operators
+    must explicitly configure this setting.
+    Existing blocks that already store a legacy ``param_name`` value
+    continue to use that value as a fallback.
+
+Privacy
+~~~~~~~
+
+Values sent through ``USER_QUERY_PARAMS`` become part of the survey URL.
+Query strings are recorded in web server and proxy logs, kept in browser
+history, and may be forwarded in ``Referer`` headers. Before mapping
+``email``, ``username``, or ``user_id``, confirm that sending that data to
+Qualtrics is acceptable under your institution's privacy policy.
+``anonymous_id`` is the least identifying option.
+
+
+Upgrading
+~~~~~~~~~
+
+Version 2.0 changed two defaults. Blocks that never set these fields in
+Studio relied on the old defaults will behave differently after upgrading.
+
+``param_name`` default changed from ``"a"`` to ``""``
+    Blocks that never set this field used to send ``?a=<anonymous id>``.
+    They now send no user parameters. The field is no longer editable in
+    Studio; blocks that explicitly saved a value keep using it. To restore
+    the old behaviour platform-wide, configure:
+
+    .. code-block:: python
+
+        XBLOCK_SETTINGS["QualtricsSurvey"] = {
+            "USER_QUERY_PARAMS": {"a": "anonymous_id"},
+        }
+
+``your_university`` default changed from ``"stanforduniversity"`` to ``""``
+    Blocks that never set this field now render a link without a
+    subdomain unless ``DEFAULT_UNIVERSITY`` is configured. To restore the
+    old behaviour platform-wide, configure:
+
+    .. code-block:: python
+
+        XBLOCK_SETTINGS["QualtricsSurvey"] = {
+            "DEFAULT_UNIVERSITY": "stanforduniversity",
+        }
 
 
 Participants
