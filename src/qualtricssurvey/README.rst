@@ -101,6 +101,46 @@ the Django settings:
     Existing blocks that already store a legacy ``param_name`` value
     continue to use that value as a fallback.
 
+Privacy
+~~~~~~~
+
+Values sent through ``USER_QUERY_PARAMS`` become part of the survey URL.
+Query strings are recorded in web server and proxy logs, kept in browser
+history, and may be forwarded in ``Referer`` headers. Before mapping
+``email``, ``username``, or ``user_id``, confirm that sending that data to
+Qualtrics is acceptable under your institution's privacy policy.
+``anonymous_id`` is the least identifying option.
+
+
+Upgrading
+~~~~~~~~~
+
+Version 2.0 changed two defaults. Blocks that never set these fields in
+Studio relied on the old defaults will behave differently after upgrading.
+
+``param_name`` default changed from ``"a"`` to ``""``
+    Blocks that never set this field used to send ``?a=<anonymous id>``.
+    They now send no user parameters. The field is no longer editable in
+    Studio; blocks that explicitly saved a value keep using it. To restore
+    the old behaviour platform-wide, configure:
+
+    .. code-block:: python
+
+        XBLOCK_SETTINGS["QualtricsSurvey"] = {
+            "USER_QUERY_PARAMS": {"a": "anonymous_id"},
+        }
+
+``your_university`` default changed from ``"stanforduniversity"`` to ``""``
+    Blocks that never set this field now render a link without a
+    subdomain unless ``DEFAULT_UNIVERSITY`` is configured. To restore the
+    old behaviour platform-wide, configure:
+
+    .. code-block:: python
+
+        XBLOCK_SETTINGS["QualtricsSurvey"] = {
+            "DEFAULT_UNIVERSITY": "stanforduniversity",
+        }
+
 
 Participants
 ~~~~~~~~~~~~
