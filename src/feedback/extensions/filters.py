@@ -37,7 +37,7 @@ class AddFeedbackTab(PipelineStep):
             context (dict): the context for the instructor dashboard.
             _ (str): instructor dashboard template name.
         """
-        if not settings.FEATURES.get("ENABLE_FEEDBACK_INSTRUCTOR_VIEW", False):
+        if not getattr(settings, "ENABLE_FEEDBACK_INSTRUCTOR_VIEW", False):
             return {
                 "context": context,
             }

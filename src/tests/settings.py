@@ -17,9 +17,7 @@ INSTALLED_APPS = [
     "workbench",
 ]
 
-FEATURES = {
-    "ENABLE_FEEDBACK_INSTRUCTOR_VIEW": True,
-}
+ENABLE_FEEDBACK_INSTRUCTOR_VIEW = True
 
 SECRET_KEY = "fake-key"
 

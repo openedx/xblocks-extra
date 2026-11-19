@@ -47,7 +47,7 @@ To enable the FeedbackXBlock report in the instructor dashboard, you can use the
     version: 0.1.0
     patches:
       openedx-common-settings: |
-        FEATURES["ENABLE_FEEDBACK_INSTRUCTOR_VIEW"] = True
+        ENABLE_FEEDBACK_INSTRUCTOR_VIEW = True
         OPEN_EDX_FILTERS_CONFIG = {
           "org.openedx.learning.instructor.dashboard.render.started.v1": {
             "fail_silently": False,

@@ -80,7 +80,7 @@ class TestFilters(TestCase):
         get_user_enrollments_mock.assert_called_once()
         self.assertEqual(1, len(result.get("context", {})["sections"]))
 
-    @override_settings(FEATURES={"ENABLE_FEEDBACK_INSTRUCTOR_VIEW": False})
+    @override_settings(ENABLE_FEEDBACK_INSTRUCTOR_VIEW=False)
     def test_run_filter_disable(self):
         context = {"course": Mock(id="test-course-id"), "sections": []}
         template_name = "test-template-name"
