@@ -67,8 +67,12 @@ Localization (l10n) is adapting a program to local language and cultural habits.
 
 This project follows [OEP-58](https://docs.openedx.org/en/latest/developers/concepts/oep58.html) for centralized
 translation management via the [openedx-translations](https://github.com/openedx/openedx-translations) repository.
-The daily extraction workflow in openedx-translations clones this repo, runs `make extract_translations`, and pushes
-the combined source `.po` file to Transifex for the translation community to translate.
+The daily extraction workflow in openedx-translations clones this repo, runs `make extract_translations`, and commits
+each XBlock's source `.po` file under `translations/xblocks-extra/<module_name>/conf/locale/`. Each XBlock is a
+separate Transifex resource.
+
+Open edX pulls the translations from openedx-translations with `atlas`
+(`make pull_xblock_translations` in openedx-platform).
 
 ### Prerequisites
 
@@ -77,52 +81,34 @@ the combined source `.po` file to Transifex for the translation community to tra
 
 ### Translation Workflow
 
-1. **Mark translatable strings** in Python and JavaScript using `gettext` / `ugettext`.
+1. **Mark translatable strings** in Python and JavaScript using `gettext`.
 2. **Extract** source strings: `make extract_translations`
-3. **Compile** translations: `make compile_translations`
 
 ### Make Targets
 
 | Target | Description |
 |--------|-------------|
-| `extract_translations` | Extract translatable strings from all XBlocks into per-xblock `text.po` files, then merge into a combined `conf/locale/en/LC_MESSAGES/django.po` for OEP-58 |
-| `compile_translations` | Compile `.po` files into `.mo` message files for each XBlock |
-| `dummy_translations` | Generate dummy (Esperanto) `.po` files for testing |
-| `build_dummy_translations` | Extract, generate dummy, and compile translations |
-| `validate_translations` | Build dummy translations and detect changed source files |
-| `detect_changed_source_translations` | Check if source `.po` files are up-to-date |
-| `pull_translations` | Pull translations from Transifex |
-| `push_translations` | Extract and push source translations to Transifex |
-| `install_transifex_client` | Install the Transifex CLI client |
+| `extract_translations` | Extract translatable strings into `<module_name>/conf/locale/` for each XBlock |
 
 ### How It Works
 
-Each XBlock in `src/` has its own `conf/locale/` directory with a `config.yaml` and `.tx/config`.
-During extraction:
+Each XBlock in `src/` has its own `conf/locale/config.yaml`. During extraction:
 
 1. `i18n_tool extract` runs in each XBlock directory, producing `django.po` (and optionally `djangojs.po`).
 2. If `djangojs.po` exists, it is merged into `django.po` using `msgcat`.
-3. The merged file is renamed to `text.po`.
-4. All per-xblock `text.po` files are combined via `msgcat --use-first` into a single
-   `conf/locale/en/LC_MESSAGES/django.po` at the repository root for the openedx-translations pipeline.
+3. The result is moved to `<module_name>/conf/locale/en/LC_MESSAGES/django.po` at the repository root.
 
 ### Verifying Translations
 
 ```bash
-# Dry-run extraction
+# Extract the source strings
 make extract_translations
 
-# Check the combined output
-cat conf/locale/en/LC_MESSAGES/django.po
-
-# Build and test with dummy translations
-make build_dummy_translations
-
-# Verify Transifex config (requires tx CLI)
-cd src/<xblock_name> && tx status
+# Check the output for one XBlock
+cat feedback/conf/locale/en/LC_MESSAGES/django.po
 ```
 
-> **Note:** The `.gitignore` ignores `*.po` and `*.mo` files. This is expected — translation source
+> **Note:** The `.gitignore` ignores the extracted `.po` files. This is expected — translation source
 > files are managed in the [openedx-translations](https://github.com/openedx/openedx-translations)
 > repository, not committed here.
 
