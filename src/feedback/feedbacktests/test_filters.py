@@ -2,12 +2,38 @@
 Test for the instructor dashboard filters.
 """
 
+import gettext
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from django.test.utils import override_settings
 
+from feedback.extensions import filters
 from feedback.extensions.filters import AddFeedbackTab, load_xblock_answers
+
+TEMPLATE_MESSAGES = (
+    "Component",
+    "Number of ratings",
+    "Average rating",
+    "Feedback ",
+    "Comment",
+    "Vote",
+    "No vote",
+)
+
+
+class FakeBlockCatalog(gettext.NullTranslations):
+    """
+    A stand-in for the feedback block's catalog that "translates" by upper-casing.
+    """
+
+    def __init__(self, messages):
+        super().__init__()
+        self._catalog = {message: message.upper() for message in messages}
+        self.plural = lambda n: int(n != 1)
+
+    def gettext(self, message):
+        return self._catalog.get(message, message)
 
 
 class TestFilters(TestCase):
@@ -117,6 +143,66 @@ class TestFilters(TestCase):
             ],
             answers,
         )
+
+    @patch("feedback.extensions.filters.load_single_xblock")
+    def test_load_xblock_answers_no_vote(self, load_single_xblock_mock):
+        """
+        An answer with no vote keeps -1, so the template shows a translated "No vote".
+        """
+        single_block = Mock(user_vote=-1, user_freeform="test-user-freeform")
+        single_block.get_prompt.return_value = {"scale_text": ["test-scale-text"]}
+        load_single_xblock_mock.return_value = single_block
+
+        answers = load_xblock_answers(Mock(), [(1, "test-username")], "test-course-id", "test-block-id", Mock())
+
+        self.assertEqual(-1, answers[0]["user_vote"])
+
+    @patch("feedback.extensions.filters.load_blocks")
+    def test_run_filter_translates_with_block_catalog(self, load_blocks_mock):
+        """
+        The tab title and template text are translated with the feedback block's own catalog.
+        """
+        load_blocks_mock.return_value = [
+            {
+                "display_name": "test-display-name",
+                "vote_aggregate": [],
+                "answers": [{"user_freeform": "test-user-freeform", "user_vote": -1}],
+                "average_rating": 0,
+                "url": "test-url",
+            }
+        ]
+        context = {"course": Mock(id="test-course-id"), "sections": []}
+
+        catalog = FakeBlockCatalog(TEMPLATE_MESSAGES + ("Course Feedback",))
+        with patch.object(AddFeedbackTab, "i18n_service", return_value=catalog):
+            result = self.filter.run_filter(context, "test-template-name")
+
+        section = result["context"]["sections"][0]
+        self.assertEqual("COURSE FEEDBACK", section["section_display_name"])
+        html = section["fragment"].content
+        for message in TEMPLATE_MESSAGES:
+            self.assertIn(message.upper(), html)
+
+    def test_i18n_service_uses_platform_service(self):
+        """
+        In the platform, the filter asks XBlockI18nService for the feedback block's catalog.
+        """
+        platform_service = Mock()
+        with patch.object(filters, "XBlockI18nService", platform_service):
+            service = self.filter.i18n_service()
+
+        platform_service.assert_called_once_with(self.filter)
+        self.assertIs(platform_service.return_value, service)
+
+    def test_i18n_service_outside_platform(self):
+        """
+        Outside the platform the filter falls back to XBlock's null i18n service.
+        """
+        with patch.object(filters, "XBlockI18nService", None):
+            service = self.filter.i18n_service()
+
+        message = "test-message"
+        self.assertEqual(message, service.gettext(message))
 
     @patch("feedback.extensions.filters.load_single_xblock")
     def test_load_xblock_answers_skip_empty(self, load_single_xblock_mock):

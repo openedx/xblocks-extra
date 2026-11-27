@@ -6,9 +6,10 @@ import importlib.resources
 
 from crum import get_current_request
 from django.conf import settings
-from django.template import Context, Template
 from openedx_filters import PipelineStep
 from web_fragments.fragment import Fragment
+from xblock.runtime import NullI18nService
+from xblock.utils.resources import ResourceLoader
 
 try:
     from lms.djangoapps.courseware.block_render import get_block_by_usage_id, load_single_xblock
@@ -23,9 +24,17 @@ except ImportError:
     get_user_enrollments = None
     get_lms_link_for_item = None
 
+# Imported on its own so that, if it moves, the tab still renders (in English).
+try:
+    from xmodule.modulestore.django import XBlockI18nService
+except ImportError:
+    XBlockI18nService = None
+
 TEMPLATE_ABSOLUTE_PATH = "/instructor_dashboard/"
 BLOCK_CATEGORY = "feedback"
 TEMPLATE_CATEGORY = "feedback_instructor"
+
+resource_loader = ResourceLoader("feedback")
 
 
 class AddFeedbackTab(PipelineStep):
@@ -43,7 +52,8 @@ class AddFeedbackTab(PipelineStep):
             }
 
         course = context["course"]
-        template = Template(self.resource_string(f"static/html/{TEMPLATE_CATEGORY}.html"))
+        i18n_service = self.i18n_service()
+        _ = i18n_service.gettext
 
         request = get_current_request()
 
@@ -53,7 +63,11 @@ class AddFeedbackTab(PipelineStep):
             }
         )
 
-        html = template.render(Context(context))
+        html = resource_loader.render_django_template(
+            f"static/html/{TEMPLATE_CATEGORY}.html",
+            dict(context),
+            i18n_service=i18n_service,
+        )
         frag = Fragment(html)
         frag.add_css(self.resource_string(f"static/css/{TEMPLATE_CATEGORY}.css"))
         frag.add_javascript(self.resource_string(f"static/js/src/{TEMPLATE_CATEGORY}.js"))
@@ -61,13 +75,25 @@ class AddFeedbackTab(PipelineStep):
         section_data = {
             "fragment": frag,
             "section_key": TEMPLATE_CATEGORY,
-            "section_display_name": "Course Feedback",
+            "section_display_name": _("Course Feedback"),
             "course_id": str(course.id),
             "template_path_prefix": TEMPLATE_ABSOLUTE_PATH,
         }
         context["sections"].append(section_data)
 
         return {"context": context}
+
+    def i18n_service(self):
+        """
+        Return an i18n service that translates with the feedback block's own catalog.
+
+        This filter runs outside any block runtime, so there is no block i18n service to ask.
+        The platform's XBlockI18nService finds a block's catalog by the root module name of
+        the object it gets, which is ``feedback`` for this filter too.
+        """
+        if XBlockI18nService is None:
+            return NullI18nService()
+        return XBlockI18nService(self)
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -170,10 +196,10 @@ def load_xblock_answers(request, students, course_id, block_id, course):
         if student_xblock_instance:
             prompt = student_xblock_instance.get_prompt()
             if student_xblock_instance.user_freeform:
-                if student_xblock_instance.user_vote != -1:
-                    vote = prompt["scale_text"][student_xblock_instance.user_vote]
-                else:
-                    vote = "No vote"
+                # The template shows a translated "No vote" for -1.
+                vote = student_xblock_instance.user_vote
+                if vote != -1:
+                    vote = prompt["scale_text"][vote]
                 answers.append(
                     {
                         "username": username,
